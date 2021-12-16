@@ -1,7 +1,8 @@
-<ag-grid-angular style="width: 500px; height: 500px;" class="ag-theme-alpine" [rowData]="rowData"
-  [columnDefs]="columnDefs">
-</ag-grid-angular>
-
-<highcharts-chart [Highcharts]="highcharts" [options]="chartOptions"
-  style="width: 100%; height: 400px; display: block;">
-</highcharts-chart>
+<mat-tab-group>
+  <mat-tab label="Grid">
+    <app-grid></app-grid>
+  </mat-tab>
+  <mat-tab label="Chart">
+    <app-chart></app-chart>
+  </mat-tab>
+</mat-tab-group>
