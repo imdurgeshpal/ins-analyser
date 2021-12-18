@@ -1,8 +1,10 @@
 import { DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { ColDef, GridOptions } from 'ag-grid-community';
+import { MatDatepickerInputEvent } from '@angular/material/datepicker';
+import { ColDef, GridApi, GridOptions, GridReadyEvent, RowNode } from 'ag-grid-community';
 import { mockStockMarket } from '../shared/models/mock-share-market';
 import { ShareMarket } from '../shared/models/share-market';
+import { tranformStockDate } from '../shared/utils/common.utils';
 
 @Component({
   selector: 'app-grid',
@@ -11,49 +13,119 @@ import { ShareMarket } from '../shared/models/share-market';
 })
 export class GridComponent implements OnInit {
 
-  shareMarkets: ShareMarket[] = mockStockMarket;
+  shareMarkets: ShareMarket[] = tranformStockDate(mockStockMarket);
   columnDefs: ColDef[];
   rowData: ShareMarket[];
   gridOptions: GridOptions;
+  private gridApi: GridApi;
+  private selectedDate: Date | null;
 
   constructor(private datePipe: DatePipe) { }
 
   ngOnInit(): void {
-    this.rowData = [...this.shareMarkets];
     this.initColumn();
+    this.gridOptions = {
+      isExternalFilterPresent: () => true,
+      doesExternalFilterPass: this.doesExternalFilterPass.bind(this),
+    }
+  }
+
+
+  onGridReady(params: GridReadyEvent) {
+    console.log(params);
+    this.gridApi = params.api;
+    this.rowData = [...this.shareMarkets];
+  }
+
+  isExternalFilterPresent() {
+    return true;
+  }
+
+  externalFilterChanged(event: any) {
+    this.selectedDate = event.value ? new Date(event.value) : null;
+    this.gridApi.onFilterChanged();
+  }
+
+  doesExternalFilterPass(node: RowNode) {
+    if (this.selectedDate) {
+      const data: ShareMarket = node.data;
+      const registeredDate = new Date(data.registered);
+      registeredDate.setHours(0, 0, 0);
+      return registeredDate.getTime() === this.selectedDate.getTime();
+    }
+    return true;
   }
 
   private initColumn() {
     this.columnDefs = [
-      {
+      /* {
         field: 'isActive',
         width: 100
-      },
+      }, */
       {
         field: 'company',
-        width: 100
+        width: 100,
+        filter: 'agTextColumnFilter',
+        sortable: true
       },
       {
-        field: 'email'
+        field: 'email',
+        filter: 'agTextColumnFilter',
+        sortable: true,
+        width: 230
       },
       {
         field: 'industryType',
-        width: 150
+        width: 150,
+        filter: 'agTextColumnFilter',
+        sortable: true
       },
       {
-        field: 'email'
+        field: 'phone',
+        filter: 'agTextColumnFilter',
+        sortable: true,
+        width: 180
       },
       {
-        field: 'phone'
+        field: 'registered',
+        width: 150,
+        valueFormatter: param => this.datePipe.transform(param.value, 'dd-MM-YYYY') || '',
+        sortable: true,
+        comparator: (date1: string, date2: string) => new Date(date1).getTime() - new Date(date2).getTime()
       },
       {
-        field: 'registered'
+        field: 'address'
       },
       {
-        field: 'address',
-        tooltipField: 'address'
+        field: 'currentPrice',
+        sortable: true,
+        comparator: this.priceComparator,
+        width: 120,
+      },
+      {
+        field: 'price6MonthsAgo',
+        sortable: true,
+        comparator: this.priceComparator,
+        width: 120,
+      },
+      {
+        field: 'price1YearAgo',
+        sortable: true,
+        comparator: this.priceComparator,
+        width: 120,
+      },
+      {
+        field: 'price5YearsAgo',
+        sortable: true,
+        comparator: this.priceComparator,
+        width: 120
       }
     ]
   }
 
+  priceComparator = (price1: string, price2: string) => {
+    const price1$ = +(price1.replace(/(^\$|,)/g, ''));
+    const price2$ = +(price2.replace(/(^\$|,)/g, ''));
+    return price1$ - price2$;
+  }
 }
