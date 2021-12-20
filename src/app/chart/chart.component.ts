@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { MatSelectChange } from '@angular/material/select';
 import * as Highcharts from "highcharts/highstock";
 import { Options, SeriesOptionsType } from 'highcharts/highstock';
 import { mockStockMarket } from '../shared/models/mock-share-market';
@@ -12,17 +13,19 @@ import { ShareMarket } from '../shared/models/share-market';
 export class ChartComponent implements OnInit {
 
   highcharts: typeof Highcharts = Highcharts;
-  seriesOptions: Array<SeriesOptionsType> = [];
-  seriesCounter = 0;
-  names = ['MSFT', 'AAPL', 'GOOG'];
-  private shareMarkets: ShareMarket[] = mockStockMarket;
+  shareMarkets: ShareMarket[] = mockStockMarket;
 
   chartOptions: Options;
+  updateFlag: boolean;
 
   constructor() { }
 
   ngOnInit(): void {
-    this.tranformData(this.shareMarkets);
+    this.createChart();
+  }
+
+  selectionChange(event: MatSelectChange) {
+    this.tranformData(event.value);
   }
 
   private tranformData(stockData: ShareMarket[]) {
@@ -31,28 +34,27 @@ export class ChartComponent implements OnInit {
     const sixMonthAgo = new Date(new Date().setMonth(new Date().getMonth() - 6)).getTime();
     const oneYearAgo = new Date(new Date().setMonth(new Date().getMonth() - 12)).getTime();
     const fiveYearAgo = new Date(new Date().setMonth(new Date().getMonth() - 60)).getTime();
-
+    const seriesOptions: Array<SeriesOptionsType> = [];
     stockData.forEach((market, i) => {
-      if (i < 10) {
-        const arr = [];
-        const convertPrice = (price: string): number => +(price.replace(/(^\$|,)/g, ''));
-        arr.push(
-          [fiveYearAgo, convertPrice(market.price5YearsAgo)],
-          [oneYearAgo, convertPrice(market.price1YearAgo)],
-          [sixMonthAgo, convertPrice(market.price6MonthsAgo)],
-          [oneMonthAgo, convertPrice(market.price1MonthAgo)],
-          [currentDate, convertPrice(market.currentPrice)],
-        );
-        this.seriesOptions.push(
-          {
-            name: market.company,
-            data: arr,
-            type: 'line'
-          }
-        )
-      }
+      const arr = [];
+      const convertPrice = (price: string): number => +(price.replace(/(^\$|,)/g, ''));
+      arr.push(
+        [fiveYearAgo, convertPrice(market.price5YearsAgo)],
+        [oneYearAgo, convertPrice(market.price1YearAgo)],
+        [sixMonthAgo, convertPrice(market.price6MonthsAgo)],
+        [oneMonthAgo, convertPrice(market.price1MonthAgo)],
+        [currentDate, convertPrice(market.currentPrice)],
+      );
+      seriesOptions.push(
+        {
+          name: market.company,
+          data: arr,
+          type: 'line'
+        }
+      )
     });
-    this.createChart();
+    this.chartOptions.series = seriesOptions;
+    this.updateFlag = true;
   }
 
 
@@ -86,7 +88,7 @@ export class ChartComponent implements OnInit {
         valueDecimals: 2,
         split: true
       },
-      series: this.seriesOptions
+      series: []
     };
   }
 }

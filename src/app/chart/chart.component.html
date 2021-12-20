@@ -1,3 +1,13 @@
-<highcharts-chart [Highcharts]="highcharts" [constructorType]="'stockChart'" [options]="chartOptions"
-    style="width: 100%; height: 400px; display: block;">
+<mat-form-field class="w-25" appearance="fill">
+    <mat-label>Select Market to be show in chart</mat-label>
+    <mat-select multiple (selectionChange)="selectionChange($event)">
+        <mat-option *ngFor="let mrkt of shareMarkets" [value]="mrkt">
+            {{mrkt.company}}
+        </mat-option>
+    </mat-select>
+</mat-form-field>
+
+
+<highcharts-chart [Highcharts]="highcharts" class="highchart" [constructorType]="'stockChart'" [options]="chartOptions"
+    [(update)]="updateFlag" [oneToOne]="true">
 </highcharts-chart>
