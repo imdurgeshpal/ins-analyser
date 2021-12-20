@@ -22,26 +22,26 @@ export class ChartComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
-    this.tranformData();
+    this.tranformData(this.shareMarkets);
   }
 
-  private tranformData() {
+  private tranformData(stockData: ShareMarket[]) {
     const currentDate = new Date().getTime();
     const oneMonthAgo = new Date(new Date().setMonth(new Date().getMonth() - 1)).getTime();
     const sixMonthAgo = new Date(new Date().setMonth(new Date().getMonth() - 6)).getTime();
     const oneYearAgo = new Date(new Date().setMonth(new Date().getMonth() - 12)).getTime();
     const fiveYearAgo = new Date(new Date().setMonth(new Date().getMonth() - 60)).getTime();
 
-    this.shareMarkets.forEach((market, i) => {
-      if (i < 5) {
+    stockData.forEach((market, i) => {
+      if (i < 10) {
         const arr = [];
         const convertPrice = (price: string): number => +(price.replace(/(^\$|,)/g, ''));
         arr.push(
-          [currentDate, convertPrice(market.currentPrice)],
-          [oneMonthAgo, convertPrice(market.price1MonthAgo)],
-          [sixMonthAgo, convertPrice(market.price6MonthsAgo)],
+          [fiveYearAgo, convertPrice(market.price5YearsAgo)],
           [oneYearAgo, convertPrice(market.price1YearAgo)],
-          [fiveYearAgo, convertPrice(market.price5YearsAgo)]
+          [sixMonthAgo, convertPrice(market.price6MonthsAgo)],
+          [oneMonthAgo, convertPrice(market.price1MonthAgo)],
+          [currentDate, convertPrice(market.currentPrice)],
         );
         this.seriesOptions.push(
           {
