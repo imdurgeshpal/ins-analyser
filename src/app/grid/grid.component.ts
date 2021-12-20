@@ -13,7 +13,7 @@ import { tranformStockDate } from '../shared/utils/common.utils';
 })
 export class GridComponent implements OnInit {
 
-  shareMarkets: ShareMarket[] = tranformStockDate(mockStockMarket);
+  private shareMarkets: ShareMarket[] = tranformStockDate(mockStockMarket);
   columnDefs: ColDef[];
   rowData: ShareMarket[];
   gridOptions: GridOptions;
@@ -32,21 +32,17 @@ export class GridComponent implements OnInit {
 
 
   onGridReady(params: GridReadyEvent) {
-    console.log(params);
     this.gridApi = params.api;
     this.rowData = [...this.shareMarkets];
   }
 
-  isExternalFilterPresent() {
-    return true;
-  }
-
   externalFilterChanged(event: any) {
     this.selectedDate = event.value ? new Date(event.value) : null;
+    this.selectedDate?.setHours(0,0,0);
     this.gridApi.onFilterChanged();
   }
 
-  doesExternalFilterPass(node: RowNode) {
+  private doesExternalFilterPass(node: RowNode) {
     if (this.selectedDate) {
       const data: ShareMarket = node.data;
       const registeredDate = new Date(data.registered);
@@ -123,7 +119,7 @@ export class GridComponent implements OnInit {
     ]
   }
 
-  priceComparator = (price1: string, price2: string) => {
+  private priceComparator = (price1: string, price2: string) => {
     const price1$ = +(price1.replace(/(^\$|,)/g, ''));
     const price2$ = +(price2.replace(/(^\$|,)/g, ''));
     return price1$ - price2$;
