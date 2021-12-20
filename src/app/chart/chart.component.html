@@ -1,4 +1,4 @@
-<mat-form-field class="w-25" appearance="fill">
+<mat-form-field class="w-25 mt-1" appearance="fill">
     <mat-label>Select Market to be show in chart</mat-label>
     <mat-select multiple (selectionChange)="selectionChange($event)">
         <mat-option *ngFor="let mrkt of shareMarkets" [value]="mrkt">
